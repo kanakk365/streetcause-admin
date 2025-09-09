@@ -233,10 +233,10 @@ export default function DashboardPage() {
   // Show loading while checking authentication
   if (isAuthChecking) {
     return (
-      <div className="font-sans min-h-screen bg-background flex items-center justify-center p-6">
+      <div className="font-sans min-h-screen bg-background flex items-center justify-center p-4 sm:p-6">
         <div className="flex items-center gap-3 text-primary">
-          <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-lg font-medium">
+          <div className="w-5 h-5 sm:w-6 sm:h-6 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-base sm:text-lg font-medium">
             Checking authentication...
           </span>
         </div>
@@ -246,19 +246,19 @@ export default function DashboardPage() {
 
   return (
     <div className="font-sans min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto p-6 sm:p-8 space-y-8">
-        <header className="flex items-center justify-between">
-          <div className="inline-flex items-center gap-3 px-6 py-3 bg-card/80 backdrop-blur-sm rounded-full border border-border shadow-lg">
-            <Users className="w-8 h-8 text-primary" />
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#7033ff] ">
-              Street Cause Admin Dashboard
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12 space-y-6 sm:space-y-8">
+        <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-0">
+          <div className="inline-flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3 bg-card/80 backdrop-blur-sm rounded-full border border-border shadow-lg">
+            <Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
+            <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-[#7033ff]">
+              Street Cause Admin 
             </h1>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center lg:justify-end gap-3">
             <ThemeToggle />
             <button
               onClick={handleLogout}
-              className="inline-flex cursor-pointer items-center gap-2 px-4 py-2 border border-destructive text-destructive rounded-lg font-medium transition-colors duration-200 shadow-lg hover:bg-destructive/10"
+              className="inline-flex cursor-pointer items-center gap-2 px-3 py-2 sm:px-4 border border-destructive text-destructive rounded-lg font-medium transition-colors duration-200 shadow-lg hover:bg-destructive/10 text-sm sm:text-base"
             >
               <LogOut className="w-4 h-4" />
               Logout
@@ -329,10 +329,10 @@ function DataCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border shadow-xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-foreground">{title}</h2>
-        <div className="flex items-center gap-4">
+    <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border shadow-xl p-4 sm:p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">{title}</h2>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
           {divisionSelector}
           {loading && (
             <div className="flex items-center gap-2 text-primary">
@@ -343,7 +343,7 @@ function DataCard({
         </div>
       </div>
       {error ? (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4 text-destructive">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 sm:p-4 text-destructive text-sm sm:text-base">
           {error}
         </div>
       ) : (
@@ -378,43 +378,43 @@ function AdminStatsDisplay({
   const detailedStats = data.detailedStats[selectedDivision];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       <div>
-        <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
-          <TrendingUp className="w-6 h-6 text-primary" />
+        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6 flex items-center gap-2">
+          <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           Overall Statistics
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-primary to-accent p-6 rounded-xl text-primary-foreground shadow-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-gradient-to-br from-primary to-accent p-4 sm:p-6 rounded-xl text-primary-foreground shadow-lg">
             <div className="flex items-center justify-between mb-2">
-              <Users className="w-8 h-8 opacity-80" />
-              <div className="text-3xl font-bold">
+              <Users className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
+              <div className="text-2xl sm:text-3xl font-bold">
                 {divisionStats.memberStats.totalMembers}
               </div>
             </div>
-            <div className="text-primary-foreground/80 font-medium">
+            <div className="text-primary-foreground/80 font-medium text-sm sm:text-base">
               Total Members
             </div>
           </div>
-          <div className="bg-gradient-to-br from-chart-1 to-chart-2 p-6 rounded-xl text-primary-foreground shadow-lg">
+          <div className="bg-gradient-to-br from-chart-1 to-chart-2 p-4 sm:p-6 rounded-xl text-primary-foreground shadow-lg">
             <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="w-8 h-8 opacity-80" />
-              <div className="text-3xl font-bold">
+              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
+              <div className="text-2xl sm:text-3xl font-bold">
                 {divisionStats.eventSales.totalSales}
               </div>
             </div>
-            <div className="text-primary-foreground/80 font-medium">
+            <div className="text-primary-foreground/80 font-medium text-sm sm:text-base">
               Total Sales
             </div>
           </div>
-          <div className="bg-gradient-to-br from-chart-2 to-chart-4 p-6 rounded-xl text-primary-foreground shadow-lg">
+          <div className="bg-gradient-to-br from-chart-2 to-chart-4 p-4 sm:p-6 rounded-xl text-primary-foreground shadow-lg sm:col-span-2 lg:col-span-1">
             <div className="flex items-center justify-between mb-2">
-              <DollarSign className="w-8 h-8 opacity-80" />
-              <div className="text-3xl font-bold">
+              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
+              <div className="text-2xl sm:text-3xl font-bold">
                 ₹{divisionStats.eventSales.totalRevenue.toLocaleString()}
               </div>
             </div>
-            <div className="text-primary-foreground/80 font-medium">
+            <div className="text-primary-foreground/80 font-medium text-sm sm:text-base">
               Total Revenue
             </div>
           </div>
@@ -422,37 +422,34 @@ function AdminStatsDisplay({
       </div>
 
       <div>
-        <h3 className="text-xl font-bold text-foreground mb-6">
+        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6">
           Member Type Statistics
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {Object.entries(data.filteredStats).map(([type, memberStats]) => (
             <div
               key={type}
-              className="bg-card rounded-xl border border-border p-6 shadow-lg"
+              className="bg-card rounded-xl border border-border p-4 sm:p-6 shadow-lg"
             >
-              <div className="text-lg font-bold mb-4 uppercase text-foreground tracking-wide">
+              <div className="text-base sm:text-lg font-bold mb-3 sm:mb-4 uppercase text-foreground tracking-wide">
                 {type} Members
               </div>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Count:</span>
-                  <span className="font-bold text-xl text-foreground">
+                  <span className="text-muted-foreground text-sm sm:text-base">Count:</span>
+                  <span className="font-bold text-lg sm:text-xl text-foreground">
                     {memberStats[selectedDivision].count}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Revenue:</span>
-                  <span className="font-bold text-chart-3">
-                    ₹
-                    {memberStats[
-                      selectedDivision
-                    ].eventSales.totalRevenue.toLocaleString()}
+                  <span className="text-muted-foreground text-sm sm:text-base">Revenue:</span>
+                  <span className="font-bold text-chart-3 text-sm sm:text-base">
+                    ₹{memberStats[selectedDivision].eventSales.totalRevenue.toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground">Sales:</span>
-                  <span className="font-bold text-chart-1">
+                  <span className="text-muted-foreground text-sm sm:text-base">Sales:</span>
+                  <span className="font-bold text-chart-1 text-sm sm:text-base">
                     {memberStats[selectedDivision].eventSales.totalSales}
                   </span>
                 </div>
@@ -463,8 +460,8 @@ function AdminStatsDisplay({
       </div>
 
       <div>
-        <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
-          <User className="w-6 h-6 text-primary" />
+        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6 flex items-center gap-2">
+          <User className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
           Member Hierarchy
         </h3>
         <div className="space-y-4">
@@ -476,28 +473,28 @@ function AdminStatsDisplay({
               {/* L1 Member - Always visible, clickable */}
               <button
                 onClick={() => toggleL1Member(l1Member.id.toString())}
-                className="w-full p-4 text-left hover:bg-muted transition-colors duration-200"
+                className="w-full p-3 sm:p-4 text-left hover:bg-muted transition-colors duration-200"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <div className="flex items-center gap-2">
                       {expandedL1.has(l1Member.id.toString()) ? (
-                        <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       ) : (
-                        <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                       )}
-                      <div className="w-3 h-3 bg-primary rounded-full"></div>
+                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-primary rounded-full"></div>
                     </div>
-                    <div>
-                      <div className="font-semibold text-foreground">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-foreground text-sm sm:text-base truncate">
                         L1: {l1Member.name}
                       </div>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-xs sm:text-sm text-muted-foreground truncate">
                         {l1Member.affiliation} • {l1Member.roleName}
                       </div>
                     </div>
                   </div>
-                  <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium">
+                  <span className="bg-primary/10 text-primary px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium self-start sm:self-center">
                     {l1Member.uniqueDandiyaId}
                   </span>
                 </div>
@@ -508,28 +505,28 @@ function AdminStatsDisplay({
                 <div className="border-t border-border">
                   <button
                     onClick={() => toggleL2Member(l1Member.id.toString())}
-                    className="w-full p-4 pl-12 text-left hover:bg-muted transition-colors duration-200"
+                    className="w-full p-3 sm:p-4 pl-8 sm:pl-12 text-left hover:bg-muted transition-colors duration-200"
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                      <div className="flex items-center gap-2 sm:gap-3">
                         <div className="flex items-center gap-2">
                           {expandedL2.has(`${l1Member.id.toString()}-l2`) ? (
                             <ChevronDown className="w-4 h-4 text-muted-foreground" />
                           ) : (
                             <ChevronRight className="w-4 h-4 text-muted-foreground" />
                           )}
-                          <div className="w-2.5 h-2.5 bg-chart-3 rounded-full"></div>
+                          <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-chart-3 rounded-full"></div>
                         </div>
-                        <div>
-                          <div className="font-medium text-foreground">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-foreground text-sm sm:text-base truncate">
                             L2: {l1Member.l2Member.name}
                           </div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-xs sm:text-sm text-muted-foreground truncate">
                             {l1Member.l2Member.affiliation}
                           </div>
                         </div>
                       </div>
-                      <span className="bg-chart-3/10 text-chart-3 px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="bg-chart-3/10 text-chart-3 px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium self-start sm:self-center">
                         {l1Member.l2Member.uniqueDandiyaId}
                       </span>
                     </div>
@@ -538,17 +535,17 @@ function AdminStatsDisplay({
                   {/* L4 Member - Shows when L2 is expanded */}
                   {expandedL2.has(`${l1Member.id.toString()}-l2`) && (
                     <div className="border-t border-border bg-muted/25">
-                      <div className="p-4 pl-20">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="w-2 h-2 bg-chart-2 rounded-full"></div>
-                            <div>
-                              <div className="font-medium text-foreground">
+                      <div className="p-3 sm:p-4 pl-12 sm:pl-20">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
+                          <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-chart-2 rounded-full"></div>
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium text-foreground text-sm sm:text-base truncate">
                                 L4: {l1Member.l2Member.l4Member.name}
                               </div>
                             </div>
                           </div>
-                          <span className="bg-chart-2/10 text-chart-2 px-3 py-1 rounded-full text-sm font-medium">
+                          <span className="bg-chart-2/10 text-chart-2 px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium self-start sm:self-center">
                             {l1Member.l2Member.l4Member.uniqueDandiyaId}
                           </span>
                         </div>
