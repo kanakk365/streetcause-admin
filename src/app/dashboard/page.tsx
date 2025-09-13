@@ -9,7 +9,9 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import {
   DataCard,
   MemberHierarchyDisplay,
+  MemberHierarchySkeleton,
   TransactionStatsDisplay,
+  TransactionStatsSkeleton,
 } from "@/components";
 import type {
   Division,
@@ -215,25 +217,33 @@ export default function DashboardPage() {
           }
         >
           {/* Transaction Statistics */}
-          {transactionData.data && (
-            <TransactionStatsDisplay
-              data={transactionData.data.data}
-              selectedDivision={selectedDivision}
-            />
+          {transactionData.loading ? (
+            <TransactionStatsSkeleton />
+          ) : (
+            transactionData.data && (
+              <TransactionStatsDisplay
+                data={transactionData.data.data}
+                selectedDivision={selectedDivision}
+              />
+            )
           )}
 
           {/* Member Hierarchy View */}
-          {hierarchyData.data && (
-            <MemberHierarchyDisplay
-              data={hierarchyData.data.data}
-              expandedL4={expandedL4}
-              expandedL2={expandedHierarchyL2}
-              toggleL4Member={toggleL4Member}
-              toggleL2Member={(key: string) => {
-                const [l4Id, l2Id] = key.split("-");
-                toggleHierarchyL2Member(l4Id, l2Id);
-              }}
-            />
+          {hierarchyData.loading ? (
+            <MemberHierarchySkeleton />
+          ) : (
+            hierarchyData.data && (
+              <MemberHierarchyDisplay
+                data={hierarchyData.data.data}
+                expandedL4={expandedL4}
+                expandedL2={expandedHierarchyL2}
+                toggleL4Member={toggleL4Member}
+                toggleL2Member={(key: string) => {
+                  const [l4Id, l2Id] = key.split("-");
+                  toggleHierarchyL2Member(l4Id, l2Id);
+                }}
+              />
+            )
           )}
         </DataCard>
       </div>
