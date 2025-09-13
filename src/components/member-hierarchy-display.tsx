@@ -347,36 +347,39 @@ export function MemberHierarchyDisplay({
                 <div className="flex gap-3">
                   <button
                     onClick={() => toggleSubFilter('normal')}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                    className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                       subFilters.normal
                         ? 'bg-blue-100 text-blue-800'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     <Ticket className="w-4 h-4" />
-                    Normal Tickets
+                    <span className="sm:hidden">Normal</span>
+                    <span className="hidden sm:inline">Normal Tickets</span>
                   </button>
                   <button
                     onClick={() => toggleSubFilter('vip')}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                    className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                       subFilters.vip
                         ? 'bg-purple-100 text-purple-800'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     <Crown className="w-4 h-4" />
-                    VIP Tickets
+                    <span className="sm:hidden">VIP</span>
+                    <span className="hidden sm:inline">VIP Tickets</span>
                   </button>
                   <button
                     onClick={() => toggleSubFilter('donations')}
-                    className={`px-3 py-1 rounded-md text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
+                    className={`px-3 py-1 rounded-md text-xs sm:text-sm font-medium transition-all duration-200 flex items-center gap-2 cursor-pointer ${
                       subFilters.donations
                         ? 'bg-green-100 text-green-800'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
                     <Heart className="w-4 h-4" />
-                    Donations
+                    <span className="sm:hidden">Donations</span>
+                    <span className="hidden sm:inline">Donations</span>
                   </button>
                 </div>
               </div>
@@ -488,30 +491,39 @@ export function MemberHierarchyDisplay({
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-t border-border">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 py-3 bg-muted/30 r gap-3 sm:gap-0">
+              {/* Item count - responsive text */}
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground order-2 sm:order-1">
+                <span className="hidden sm:inline">
                   Showing {Math.min(startIndex + 1, totalItems)} to {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems} transactions
+                </span>
+                <span className="sm:hidden">
+                  {Math.min(startIndex + 1, totalItems)}-{Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Pagination controls */}
+              <div className="flex items-center justify-center sm:justify-end gap-1 sm:gap-2 order-1 sm:order-2">
+                {/* Previous button */}
                 <button
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className="px-3 py-1 text-sm border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
-                  Previous
+                  <span className="hidden sm:inline">Previous</span>
+                  <span className="sm:hidden">‹</span>
                 </button>
 
+                {/* Page numbers - responsive display */}
                 <div className="flex items-center gap-1">
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  {/* Show fewer pages on mobile - simplified approach */}
+                  {Array.from({ length: Math.min(totalPages, 3) }, (_, i) => {
                     const pageNum = i + 1;
                     return (
                       <button
                         key={pageNum}
                         onClick={() => setCurrentPage(pageNum)}
-                        className={`px-3 py-1 text-sm border rounded-md transition-colors cursor-pointer ${
+                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm border rounded-md transition-colors cursor-pointer ${
                           currentPage === pageNum
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'border-border hover:bg-muted'
@@ -521,12 +533,14 @@ export function MemberHierarchyDisplay({
                       </button>
                     );
                   })}
-                  {totalPages > 5 && (
+
+                  {/* Show ellipsis and last page only when needed */}
+                  {totalPages > 3 && (
                     <>
-                      <span className="px-2 text-muted-foreground">...</span>
+                      <span className="hidden sm:inline px-2 text-muted-foreground">...</span>
                       <button
                         onClick={() => setCurrentPage(totalPages)}
-                        className={`px-3 py-1 text-sm border rounded-md transition-colors cursor-pointer ${
+                        className={`px-2 sm:px-3 py-1 text-xs sm:text-sm border rounded-md transition-colors cursor-pointer ${
                           currentPage === totalPages
                             ? 'bg-primary text-primary-foreground border-primary'
                             : 'border-border hover:bg-muted'
@@ -538,12 +552,14 @@ export function MemberHierarchyDisplay({
                   )}
                 </div>
 
+                {/* Next button */}
                 <button
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className="px-3 py-1 text-sm border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm border border-border rounded-md hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
                 >
-                  Next
+                  <span className="hidden sm:inline">Next</span>
+                  <span className="sm:hidden">›</span>
                 </button>
               </div>
             </div>
