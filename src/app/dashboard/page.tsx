@@ -100,7 +100,6 @@ export default function DashboardPage() {
     fetchTransactionData(event);
   }, [selectedDivision, fetchHierarchyData, fetchTransactionData]);
 
-
   const toggleL4Member = (memberId: string) => {
     const newExpanded = new Set(expandedL4);
     if (newExpanded.has(memberId)) {
@@ -168,10 +167,10 @@ export default function DashboardPage() {
   return (
     <div className="font-sans min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-12 space-y-6 sm:space-y-8">
-        <header className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-0">
-          <div className="inline-flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3 bg-card/80 backdrop-blur-sm rounded-full border border-border shadow-lg">
+        <header className="flex flex-row lg:items-center lg:justify-between gap-4 lg:gap-0">
+          <div className="inline-flex  items-center gap-3 px-4 py-3 sm:px-6 sm:py-3 bg-card/80 backdrop-blur-sm rounded-full border border-border shadow-lg">
             <Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-            <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-[#7033ff]">
+            <h1 className="text-lg sm:text-3xl lg:text-4xl font-bold text-[#7033ff]">
               Street Cause Admin
             </h1>
           </div>
@@ -182,37 +181,43 @@ export default function DashboardPage() {
               className="inline-flex cursor-pointer items-center gap-2 px-3 py-2 sm:px-4 border border-destructive text-destructive rounded-lg font-medium transition-colors duration-200 shadow-lg hover:bg-destructive/10 text-sm sm:text-base"
             >
               <LogOut className="w-4 h-4" />
-              Logout
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </header>
 
         {/* Member Hierarchy View */}
         <DataCard
-          title={selectedDivision === "d1" ? "Dandiya 1 Overview" : "Dandiya 2 Overview"}
+          title={
+            selectedDivision === "d1"
+              ? "Dandiya 1 Overview"
+              : "Dandiya 2 Overview"
+          }
           error={hierarchyData.error || transactionData.error}
           divisionSelector={
-            <div className="inline-flex bg-card/80 backdrop-blur-sm p-2 rounded-xl border border-border shadow-lg">
-              <button
-                onClick={() => setSelectedDivision("d1")}
-                className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
-                  selectedDivision === "d1"
-                    ? "bg-primary text-primary-foreground shadow-lg transform scale-105"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                Dandiya 1
-              </button>
-              <button
-                onClick={() => setSelectedDivision("d2")}
-                className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
-                  selectedDivision === "d2"
-                    ? "bg-primary text-primary-foreground shadow-lg transform scale-105"
-                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
-                }`}
-              >
-                Dandiya 2
-              </button>
+            <div className="w-full flex justify-center sm:justify-start">
+              <div className="inline-flex bg-card/80 backdrop-blur-sm p-2 rounded-xl border border-border shadow-lg">
+                <button
+                  onClick={() => setSelectedDivision("d1")}
+                  className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
+                    selectedDivision === "d1"
+                      ? "bg-primary text-primary-foreground shadow-lg transform scale-105"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Dandiya 1
+                </button>
+                <button
+                  onClick={() => setSelectedDivision("d2")}
+                  className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 text-sm ${
+                    selectedDivision === "d2"
+                      ? "bg-primary text-primary-foreground shadow-lg transform scale-105"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  }`}
+                >
+                  Dandiya 2
+                </button>
+              </div>
             </div>
           }
         >
