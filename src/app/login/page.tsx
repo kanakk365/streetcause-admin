@@ -1,67 +1,60 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Users } from "lucide-react"
-import { type ApiClient, createApiClient } from "@/lib/api"
-import type { AdminLoginRequest, AdminLoginResponse } from "@/lib/types"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Users } from "lucide-react";
+import { type ApiClient, createApiClient } from "@/lib/api";
 
 export default function LoginPage() {
-  const [api] = useState<ApiClient>(() => createApiClient())
-  const [isLoading, setIsLoading] = useState(false)
+  const [api] = useState<ApiClient>(() => createApiClient());
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Check if already authenticated
   useEffect(() => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("scp_admin_token") : null
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("scp_admin_token")
+        : null;
     if (token) {
-      // Redirect to dashboard if already logged in
-      window.location.href = "/dashboard"
+      window.location.href = "/dashboard";
     }
-  }, [])
+  }, []);
 
   async function handleAdminLogin(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
-    const form = new FormData(e.currentTarget)
-    const username = String(form.get("username") ?? "")
-    const password = String(form.get("password") ?? "")
+    const form = new FormData(e.currentTarget);
+    const username = String(form.get("username") ?? "");
+    const password = String(form.get("password") ?? "");
 
     try {
-      const res = await api.adminLogin({ username, password })
-      const token = extractToken(res)
-      if (!token) throw new Error("Token not found in response")
+      const res = await api.adminLogin({ username, password });
+      const token = extractToken(res);
+      if (!token) throw new Error("Token not found in response");
 
-      api.setToken(token)
-      localStorage.setItem("scp_admin_token", token)
+      api.setToken(token);
+      localStorage.setItem("scp_admin_token", token);
 
-      // Redirect to dashboard after successful login
-      window.location.href = "/dashboard"
+      window.location.href = "/dashboard";
     } catch (error) {
-      console.error("Login failed:", error)
-      alert("Login failed. Please check your credentials.")
+      console.error("Login failed:", error);
+      alert("Login failed. Please check your credentials.");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
   }
 
   function extractToken(res: unknown): string | undefined {
-    if (!res || typeof res !== "object") return undefined
-    const obj = res as Record<string, unknown>
+    if (!res || typeof res !== "object") return undefined;
+    const obj = res as Record<string, unknown>;
 
-    // First try direct properties
-    let candidate = obj.token ?? obj.accessToken ?? obj.jwt
-    if (typeof candidate === "string" && candidate.length > 0) return candidate
-
-    // Then try nested in data object
-    const data = obj.data
+    const data = obj.data;
     if (data && typeof data === "object") {
-      const dataObj = data as Record<string, unknown>
-      candidate = dataObj.token ?? dataObj.accessToken ?? dataObj.jwt
-      if (typeof candidate === "string" && candidate.length > 0) return candidate
+      const dataObj = data as Record<string, unknown>;
+      const token = dataObj.token;
+      if (typeof token === "string" && token.length > 0) return token;
     }
-
-    return undefined
+    return undefined;
   }
 
   return (
@@ -78,7 +71,10 @@ export default function LoginPage() {
 
         <form onSubmit={handleAdminLogin} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-slate-700 mb-1">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
               Username
             </label>
             <input
@@ -92,7 +88,10 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-1">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-slate-700 mb-1"
+            >
               Password
             </label>
             <input
@@ -122,5 +121,5 @@ export default function LoginPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }

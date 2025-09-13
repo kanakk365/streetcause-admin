@@ -1,4 +1,4 @@
-import { AdminLoginRequest, AdminLoginResponse, AdminStatsQuery, AdminStatsResponse } from "./types";
+import { AdminLoginRequest, AdminLoginResponse, AdminStatsQuery, AdminStatsResponse, MemberHierarchyQuery, MemberHierarchyResponse, TransactionQuery, TransactionResponse } from "./types";
 
 const DEFAULT_BASE_URL = "https://scpapi.elitceler.com/api/v1";
 
@@ -6,6 +6,8 @@ export interface ApiClient {
   setToken(token?: string): void;
   adminLogin(body: AdminLoginRequest): Promise<AdminLoginResponse>;
   getAdminStats(query?: AdminStatsQuery): Promise<AdminStatsResponse>;
+  getMemberHierarchy(query: MemberHierarchyQuery): Promise<MemberHierarchyResponse>;
+  getTransactions(query: TransactionQuery): Promise<TransactionResponse>;
 }
 
 export function createApiClient(baseUrl: string = DEFAULT_BASE_URL, initialToken?: string): ApiClient {
@@ -51,6 +53,18 @@ export function createApiClient(baseUrl: string = DEFAULT_BASE_URL, initialToken
       if (query.limit) params.set("limit", String(query.limit));
       const qs = params.toString();
       return request(`/admin/stats${qs ? `?${qs}` : ""}`);
+    },
+
+    getMemberHierarchy(query: MemberHierarchyQuery): Promise<MemberHierarchyResponse> {
+      const params = new URLSearchParams();
+      params.set("event", query.event);
+      return request(`/admin/hierarchy?${params.toString()}`);
+    },
+
+    getTransactions(query: TransactionQuery): Promise<TransactionResponse> {
+      const params = new URLSearchParams();
+      params.set("event", query.event);
+      return request(`/admin/transactions?${params.toString()}`);
     },
   };
 }

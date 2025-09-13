@@ -134,4 +134,120 @@ export interface AdminStatsResponse {
   };
 }
 
+// New Hierarchy Types
+export interface HierarchyL1Member {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  uniqueDandiyaId: string;
+  affiliation: string;
+  roleName: string;
+}
+
+export interface HierarchyL2Member {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  affiliation: string;
+  uniqueDandiyaId: string;
+  uniqueIDforL2: string;
+  l1Members: HierarchyL1Member[];
+}
+
+export interface HierarchyL4Member {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  uniqueDandiyaId: string;
+  l2Members: HierarchyL2Member[];
+}
+
+export interface HierarchyCounts {
+  l1: number;
+  l2: number;
+  l4: number;
+  total: number;
+}
+
+export interface HierarchyData {
+  event: string;
+  l4Members: HierarchyL4Member[];
+  counts: HierarchyCounts;
+}
+
+export interface MemberHierarchyResponse {
+  success: boolean;
+  message: string;
+  data: HierarchyData;
+  meta: {
+    timestamp: string;
+  };
+}
+
+export interface MemberHierarchyQuery {
+  event: "D1" | "D2";
+}
+
+// Transaction Types
+export interface TicketTransaction {
+  id: number;
+  passId: string;
+  passPurchaseName: string;
+  mobileNumber: string;
+  email: string;
+  passType: "Normal" | "VIP";
+  memberId: string;
+  memberType: "L1" | "L2" | "L4";
+  paymentMode: string;
+  qrCode: string;
+  amount: number | null;
+  status: string;
+  razorpayOrderId: string | null;
+  razorpayPaymentId: string | null;
+  razorpaySignature: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DonationTransaction {
+  id: number;
+  donorId: string;
+  name: string;
+  mobileNumber: string;
+  email: string;
+  donationAmount: number;
+  memberId: string;
+  memberType: "L1" | "L2" | "L4";
+  paymentMode: string;
+  qrCode: string;
+  status: string;
+  razorpayOrderId: string | null;
+  razorpayPaymentId: string | null;
+  razorpaySignature: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TransactionData {
+  event: string;
+  tickets: TicketTransaction[];
+  donations: DonationTransaction[];
+}
+
+export interface TransactionResponse {
+  success: boolean;
+  message: string;
+  data: TransactionData;
+  meta: {
+    timestamp: string;
+  };
+}
+
+export interface TransactionQuery {
+  event: "D1" | "D2";
+}
+
 

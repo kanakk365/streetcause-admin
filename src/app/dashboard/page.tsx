@@ -2,23 +2,19 @@
 
 import type React from "react";
 
-import { useEffect, useState, useRef, useCallback } from "react";
-import {
-  ChevronRight,
-  ChevronDown,
-  Users,
-  TrendingUp,
-  DollarSign,
-  User,
-  LogOut,
-} from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { LogOut, Users } from "lucide-react";
 import { type ApiClient, createApiClient } from "@/lib/api";
 import { ThemeToggle } from "@/components/theme-toggle";
+import {
+  DataCard,
+  MemberHierarchyDisplay,
+  TransactionStatsDisplay,
+} from "@/components";
 import type {
-  AdminStatsData,
-  AdminStatsResponse,
   Division,
-  L1Member,
+  MemberHierarchyResponse,
+  TransactionResponse,
 } from "@/lib/types";
 
 type Loaded<T> = {
@@ -32,25 +28,55 @@ export default function DashboardPage() {
   const [adminToken, setAdminToken] = useState<string>("");
   const [isAuthChecking, setIsAuthChecking] = useState<boolean>(true);
   const [selectedDivision, setSelectedDivision] = useState<Division>("d1");
-  const [stats, setStats] = useState<Loaded<AdminStatsResponse>>({
+
+  const [hierarchyData, setHierarchyData] = useState<
+    Loaded<MemberHierarchyResponse>
+  >({
     loading: false,
   });
-  const [expandedL1, setExpandedL1] = useState<Set<string>>(new Set());
-  const [expandedL2, setExpandedL2] = useState<Set<string>>(new Set());
-
-  // Pagination state for infinite scroll
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [hasMorePages, setHasMorePages] = useState<boolean>(true);
-  const [loadingMore, setLoadingMore] = useState<boolean>(false);
-  const [accumulatedData, setAccumulatedData] = useState<AdminStatsData | null>(
-    null
+  const [expandedL4, setExpandedL4] = useState<Set<string>>(new Set());
+  const [expandedHierarchyL2, setExpandedHierarchyL2] = useState<Set<string>>(
+    new Set()
   );
 
-  // Intersection observer for infinite scroll
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const [transactionData, setTransactionData] = useState<
+    Loaded<TransactionResponse>
+  >({
+    loading: false,
+  });
 
-  // Load stored token and fetch stats
+  const fetchHierarchyData = useCallback(
+    async (event: "D1" | "D2") => {
+      setHierarchyData({ loading: true });
+      try {
+        const response = await api.getMemberHierarchy({ event });
+        setHierarchyData({ loading: false, data: response });
+      } catch (error) {
+        setHierarchyData({
+          loading: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+    [api]
+  );
+
+  const fetchTransactionData = useCallback(
+    async (event: "D1" | "D2") => {
+      setTransactionData({ loading: true });
+      try {
+        const response = await api.getTransactions({ event });
+        setTransactionData({ loading: false, data: response });
+      } catch (error) {
+        setTransactionData({
+          loading: false,
+          error: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+    [api]
+  );
+
   useEffect(() => {
     const stored =
       typeof window !== "undefined"
@@ -59,158 +85,51 @@ export default function DashboardPage() {
     if (stored) {
       api.setToken(stored);
       setAdminToken(stored);
-      // Reset pagination state
-      setCurrentPage(1);
-      setHasMorePages(true);
-      setLoadingMore(false);
-      setAccumulatedData(null);
-      setStats({ loading: true });
-      api
-        .getAdminStats({ page: 1, limit: 10 })
-        .then((s) => {
-          setStats({ loading: false, data: s });
-          setAccumulatedData(s.data);
-          setHasMorePages(
-            s.meta.pagination.page < s.meta.pagination.totalPages
-          );
-        })
-        .catch((e: unknown) =>
-          setStats({
-            loading: false,
-            error: e instanceof Error ? e.message : String(e),
-          })
-        );
+      const event = selectedDivision === "d1" ? "D1" : "D2";
+      fetchHierarchyData(event);
+      fetchTransactionData(event);
     }
     setIsAuthChecking(false);
-  }, [api]);
+  }, [api, selectedDivision, fetchHierarchyData, fetchTransactionData]);
 
-  // Function to load more data for infinite scroll
-  const loadMoreData = useCallback(async () => {
-    if (!hasMorePages || loadingMore || !accumulatedData) return;
-
-    setLoadingMore(true);
-    const nextPage = currentPage + 1;
-
-    try {
-      const response = await api.getAdminStats({ page: nextPage, limit: 10 });
-
-      // Merge the new data with accumulated data
-      const newAccumulatedData: AdminStatsData = {
-        ...accumulatedData,
-        detailedStats: {
-          d1: {
-            ...accumulatedData.detailedStats.d1,
-            l1Members: [
-              ...accumulatedData.detailedStats.d1.l1Members,
-              ...response.data.detailedStats.d1.l1Members,
-            ],
-          },
-          d2: {
-            ...accumulatedData.detailedStats.d2,
-            l1Members: [
-              ...accumulatedData.detailedStats.d2.l1Members,
-              ...response.data.detailedStats.d2.l1Members,
-            ],
-          },
-        },
-        // Keep overall stats and filtered stats from the latest response
-        overallStats: response.data.overallStats,
-        filteredStats: response.data.filteredStats,
-      };
-
-      setAccumulatedData(newAccumulatedData);
-      setCurrentPage(nextPage);
-      setHasMorePages(
-        response.meta.pagination.page < response.meta.pagination.totalPages
-      );
-
-      // Update the main stats state with the latest response for consistency
-      setStats({
-        loading: false,
-        data: { ...response, data: newAccumulatedData },
-      });
-    } catch (error) {
-      console.error("Failed to load more data:", error);
-      setStats((prev) => ({
-        ...prev,
-        error:
-          error instanceof Error ? error.message : "Failed to load more data",
-      }));
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [hasMorePages, loadingMore, accumulatedData, currentPage, api]);
-
-  // Intersection observer callback
-  const handleIntersection = useCallback(
-    (entries: IntersectionObserverEntry[]) => {
-      const [entry] = entries;
-      if (
-        entry.isIntersecting &&
-        hasMorePages &&
-        !loadingMore &&
-        accumulatedData
-      ) {
-        loadMoreData();
-      }
-    },
-    [hasMorePages, loadingMore, accumulatedData, loadMoreData]
-  );
-
-  // Setup intersection observer
   useEffect(() => {
-    if (sentinelRef.current && accumulatedData) {
-      observerRef.current = new IntersectionObserver(handleIntersection, {
-        root: null,
-        rootMargin: "100px",
-        threshold: 0.1,
-      });
+    const event = selectedDivision === "d1" ? "D1" : "D2";
+    fetchHierarchyData(event);
+    fetchTransactionData(event);
+  }, [selectedDivision, fetchHierarchyData, fetchTransactionData]);
 
-      if (sentinelRef.current) {
-        observerRef.current.observe(sentinelRef.current);
-      }
-    }
 
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [handleIntersection, accumulatedData]);
-
-  // Reset intersection observer when division changes
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-  }, [selectedDivision]);
-
-  const toggleL1Member = (memberId: string) => {
-    const newExpanded = new Set(expandedL1);
+  const toggleL4Member = (memberId: string) => {
+    const newExpanded = new Set(expandedL4);
     if (newExpanded.has(memberId)) {
       newExpanded.delete(memberId);
-      // Also collapse all L2 members under this L1
-      setExpandedL2((prev) => {
+      setExpandedHierarchyL2((prev) => {
         const newL2 = new Set(prev);
-        newL2.delete(`${memberId}-l2`);
+        newL2.forEach((key) => {
+          if (key.startsWith(`${memberId}-`)) {
+            newL2.delete(key);
+          }
+        });
         return newL2;
       });
     } else {
       newExpanded.add(memberId);
     }
-    setExpandedL1(newExpanded);
+    setExpandedL4(newExpanded);
   };
 
-  const toggleL2Member = (l1MemberId: string) => {
-    const l2Key = `${l1MemberId}-l2`;
-    const newExpanded = new Set(expandedL2);
+  const toggleHierarchyL2Member = (l4MemberId: string, l2MemberId: string) => {
+    const l2Key = `${l4MemberId}-${l2MemberId}`;
+    const newExpanded = new Set(expandedHierarchyL2);
     if (newExpanded.has(l2Key)) {
       newExpanded.delete(l2Key);
     } else {
       newExpanded.add(l2Key);
     }
-    setExpandedL2(newExpanded);
+    setExpandedHierarchyL2(newExpanded);
   };
+
+  // Fetch hierarchy data
 
   const handleLogout = () => {
     // Clear the token from localStorage
@@ -251,7 +170,7 @@ export default function DashboardPage() {
           <div className="inline-flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-3 bg-card/80 backdrop-blur-sm rounded-full border border-border shadow-lg">
             <Users className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
             <h1 className="text-xl sm:text-3xl lg:text-4xl font-bold text-[#7033ff]">
-              Street Cause Admin 
+              Street Cause Admin
             </h1>
           </div>
           <div className="flex items-center justify-center lg:justify-end gap-3">
@@ -266,11 +185,10 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Admin Stats */}
+        {/* Member Hierarchy View */}
         <DataCard
-          title={`${selectedDivision.toUpperCase()} Performance Overview`}
-          loading={stats.loading}
-          error={stats.error}
+          title={selectedDivision === "d1" ? "Dandiya 1 Overview" : "Dandiya 2 Overview"}
+          error={hierarchyData.error || transactionData.error}
           divisionSelector={
             <div className="inline-flex bg-card/80 backdrop-blur-sm p-2 rounded-xl border border-border shadow-lg">
               <button
@@ -281,7 +199,7 @@ export default function DashboardPage() {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
-                Division 1
+                Dandiya 1
               </button>
               <button
                 onClick={() => setSelectedDivision("d2")}
@@ -291,289 +209,33 @@ export default function DashboardPage() {
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 }`}
               >
-                Division 2
+                Dandiya 2
               </button>
             </div>
           }
         >
-          {accumulatedData && (
-            <AdminStatsDisplay
-              data={accumulatedData}
+          {/* Transaction Statistics */}
+          {transactionData.data && (
+            <TransactionStatsDisplay
+              data={transactionData.data.data}
               selectedDivision={selectedDivision}
-              expandedL1={expandedL1}
-              expandedL2={expandedL2}
-              toggleL1Member={toggleL1Member}
-              toggleL2Member={toggleL2Member}
-              loadingMore={loadingMore}
-              hasMorePages={hasMorePages}
-              sentinelRef={sentinelRef}
+            />
+          )}
+
+          {/* Member Hierarchy View */}
+          {hierarchyData.data && (
+            <MemberHierarchyDisplay
+              data={hierarchyData.data.data}
+              expandedL4={expandedL4}
+              expandedL2={expandedHierarchyL2}
+              toggleL4Member={toggleL4Member}
+              toggleL2Member={(key: string) => {
+                const [l4Id, l2Id] = key.split("-");
+                toggleHierarchyL2Member(l4Id, l2Id);
+              }}
             />
           )}
         </DataCard>
-      </div>
-    </div>
-  );
-}
-
-function DataCard({
-  title,
-  loading,
-  error,
-  divisionSelector,
-  children,
-}: {
-  title: string;
-  loading?: boolean;
-  error?: string;
-  divisionSelector?: React.ReactNode;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="bg-card/80 backdrop-blur-sm rounded-2xl border border-border shadow-xl p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 mb-4 sm:mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">{title}</h2>
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
-          {divisionSelector}
-          {loading && (
-            <div className="flex items-center gap-2 text-primary">
-              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-sm font-medium">Loading…</span>
-            </div>
-          )}
-        </div>
-      </div>
-      {error ? (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-3 sm:p-4 text-destructive text-sm sm:text-base">
-          {error}
-        </div>
-      ) : (
-        children
-      )}
-    </div>
-  );
-}
-
-function AdminStatsDisplay({
-  data,
-  selectedDivision,
-  expandedL1,
-  expandedL2,
-  toggleL1Member,
-  toggleL2Member,
-  loadingMore,
-  hasMorePages,
-  sentinelRef,
-}: {
-  data: AdminStatsData;
-  selectedDivision: Division;
-  expandedL1: Set<string>;
-  expandedL2: Set<string>;
-  toggleL1Member: (id: string) => void;
-  toggleL2Member: (id: string) => void;
-  loadingMore: boolean;
-  hasMorePages: boolean;
-  sentinelRef: React.RefObject<HTMLDivElement | null>;
-}) {
-  const divisionStats = data.overallStats[selectedDivision];
-  const detailedStats = data.detailedStats[selectedDivision];
-
-  return (
-    <div className="space-y-6 sm:space-y-8">
-      <div>
-        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6 flex items-center gap-2">
-          <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-          Overall Statistics
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          <div className="bg-gradient-to-br from-primary to-accent p-4 sm:p-6 rounded-xl text-primary-foreground shadow-lg">
-            <div className="flex items-center justify-between mb-2">
-              <Users className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
-              <div className="text-2xl sm:text-3xl font-bold">
-                {divisionStats.memberStats.totalMembers}
-              </div>
-            </div>
-            <div className="text-primary-foreground/80 font-medium text-sm sm:text-base">
-              Total Members
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-chart-1 to-chart-2 p-4 sm:p-6 rounded-xl text-primary-foreground shadow-lg">
-            <div className="flex items-center justify-between mb-2">
-              <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
-              <div className="text-2xl sm:text-3xl font-bold">
-                {divisionStats.eventSales.totalSales}
-              </div>
-            </div>
-            <div className="text-primary-foreground/80 font-medium text-sm sm:text-base">
-              Total Sales
-            </div>
-          </div>
-          <div className="bg-gradient-to-br from-chart-2 to-chart-4 p-4 sm:p-6 rounded-xl text-primary-foreground shadow-lg sm:col-span-2 lg:col-span-1">
-            <div className="flex items-center justify-between mb-2">
-              <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 opacity-80" />
-              <div className="text-2xl sm:text-3xl font-bold">
-                ₹{divisionStats.eventSales.totalRevenue.toLocaleString()}
-              </div>
-            </div>
-            <div className="text-primary-foreground/80 font-medium text-sm sm:text-base">
-              Total Revenue
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6">
-          Member Type Statistics
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-          {Object.entries(data.filteredStats).map(([type, memberStats]) => (
-            <div
-              key={type}
-              className="bg-card rounded-xl border border-border p-4 sm:p-6 shadow-lg"
-            >
-              <div className="text-base sm:text-lg font-bold mb-3 sm:mb-4 uppercase text-foreground tracking-wide">
-                {type} Members
-              </div>
-              <div className="space-y-2 sm:space-y-3">
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground text-sm sm:text-base">Count:</span>
-                  <span className="font-bold text-lg sm:text-xl text-foreground">
-                    {memberStats[selectedDivision].count}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground text-sm sm:text-base">Revenue:</span>
-                  <span className="font-bold text-chart-3 text-sm sm:text-base">
-                    ₹{memberStats[selectedDivision].eventSales.totalRevenue.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-muted-foreground text-sm sm:text-base">Sales:</span>
-                  <span className="font-bold text-chart-1 text-sm sm:text-base">
-                    {memberStats[selectedDivision].eventSales.totalSales}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6 flex items-center gap-2">
-          <User className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-          Member Hierarchy
-        </h3>
-        <div className="space-y-4">
-          {detailedStats.l1Members.map((l1Member: L1Member) => (
-            <div
-              key={l1Member.id}
-              className="bg-muted/50 rounded-xl border border-border overflow-hidden"
-            >
-              {/* L1 Member - Always visible, clickable */}
-              <button
-                onClick={() => toggleL1Member(l1Member.id.toString())}
-                className="w-full p-3 sm:p-4 text-left hover:bg-muted transition-colors duration-200"
-              >
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                  <div className="flex items-center gap-2 sm:gap-3">
-                    <div className="flex items-center gap-2">
-                      {expandedL1.has(l1Member.id.toString()) ? (
-                        <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                      ) : (
-                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                      )}
-                      <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-primary rounded-full"></div>
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-foreground text-sm sm:text-base truncate">
-                        L1: {l1Member.name}
-                      </div>
-                      <div className="text-xs sm:text-sm text-muted-foreground truncate">
-                        {l1Member.affiliation} • {l1Member.roleName}
-                      </div>
-                    </div>
-                  </div>
-                  <span className="bg-primary/10 text-primary px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium self-start sm:self-center">
-                    {l1Member.uniqueDandiyaId}
-                  </span>
-                </div>
-              </button>
-
-              {/* L2 Member - Shows when L1 is expanded */}
-              {expandedL1.has(l1Member.id.toString()) && (
-                <div className="border-t border-border">
-                  <button
-                    onClick={() => toggleL2Member(l1Member.id.toString())}
-                    className="w-full p-3 sm:p-4 pl-8 sm:pl-12 text-left hover:bg-muted transition-colors duration-200"
-                  >
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="flex items-center gap-2">
-                          {expandedL2.has(`${l1Member.id.toString()}-l2`) ? (
-                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                          )}
-                          <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 bg-chart-3 rounded-full"></div>
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="font-medium text-foreground text-sm sm:text-base truncate">
-                            L2: {l1Member.l2Member.name}
-                          </div>
-                          <div className="text-xs sm:text-sm text-muted-foreground truncate">
-                            {l1Member.l2Member.affiliation}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="bg-chart-3/10 text-chart-3 px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium self-start sm:self-center">
-                        {l1Member.l2Member.uniqueDandiyaId}
-                      </span>
-                    </div>
-                  </button>
-
-                  {/* L4 Member - Shows when L2 is expanded */}
-                  {expandedL2.has(`${l1Member.id.toString()}-l2`) && (
-                    <div className="border-t border-border bg-muted/25">
-                      <div className="p-3 sm:p-4 pl-12 sm:pl-20">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0">
-                          <div className="flex items-center gap-2 sm:gap-3">
-                            <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-chart-2 rounded-full"></div>
-                            <div className="min-w-0 flex-1">
-                              <div className="font-medium text-foreground text-sm sm:text-base truncate">
-                                L4: {l1Member.l2Member.l4Member.name}
-                              </div>
-                            </div>
-                          </div>
-                          <span className="bg-chart-2/10 text-chart-2 px-2 py-1 sm:px-3 rounded-full text-xs sm:text-sm font-medium self-start sm:self-center">
-                            {l1Member.l2Member.l4Member.uniqueDandiyaId}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* Loading indicator */}
-          {loadingMore && (
-            <div className="flex items-center justify-center py-8">
-              <div className="flex items-center gap-2 text-primary">
-                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-sm font-medium">
-                  Loading more members...
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Sentinel element for infinite scroll */}
-          {hasMorePages && !loadingMore && (
-            <div ref={sentinelRef} className="h-4" aria-hidden="true" />
-          )}
-        </div>
       </div>
     </div>
   );
