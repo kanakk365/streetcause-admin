@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [expandedHierarchyL2, setExpandedHierarchyL2] = useState<Set<string>>(
     new Set()
   );
+  const [isHierarchyExpanded, setIsHierarchyExpanded] = useState<boolean>(true);
 
   const [transactionData, setTransactionData] = useState<
     Loaded<TransactionResponse>
@@ -228,7 +229,6 @@ export default function DashboardPage() {
             transactionData.data && (
               <TransactionStatsDisplay
                 data={transactionData.data.data}
-                selectedDivision={selectedDivision}
               />
             )
           )}
@@ -240,13 +240,16 @@ export default function DashboardPage() {
             hierarchyData.data && (
               <MemberHierarchyDisplay
                 data={hierarchyData.data.data}
+                transactionData={transactionData.data?.data}
                 expandedL4={expandedL4}
                 expandedL2={expandedHierarchyL2}
+                isExpanded={isHierarchyExpanded}
                 toggleL4Member={toggleL4Member}
                 toggleL2Member={(key: string) => {
                   const [l4Id, l2Id] = key.split("-");
                   toggleHierarchyL2Member(l4Id, l2Id);
                 }}
+                toggleSection={() => setIsHierarchyExpanded(!isHierarchyExpanded)}
               />
             )
           )}

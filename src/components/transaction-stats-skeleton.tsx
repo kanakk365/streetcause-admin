@@ -4,8 +4,8 @@ export function TransactionStatsSkeleton() {
       {/* Overview Cards Skeleton */}
       <div>
         <div className="h-6 sm:h-8 bg-muted rounded-lg mb-4 sm:mb-6 animate-pulse"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 sm:gap-6">
+          {[...Array(2)].map((_, i) => (
             <div key={i} className="bg-muted p-4 sm:p-6 rounded-xl shadow-lg animate-pulse">
               <div className="flex items-center justify-between mb-2">
                 <div className="w-6 h-6 sm:w-8 sm:h-8 bg-muted-foreground/20 rounded"></div>
@@ -57,10 +57,6 @@ export function TransactionStatsSkeleton() {
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="w-12 h-4 bg-muted-foreground/20 rounded"></div>
-                  <div className="w-16 h-6 sm:w-20 sm:h-8 bg-muted-foreground/20 rounded"></div>
-                </div>
-                <div className="flex justify-between items-center pt-2 border-t border-border">
-                  <div className="w-8 h-4 bg-muted-foreground/20 rounded"></div>
                   <div className="w-16 h-6 sm:w-20 sm:h-8 bg-muted-foreground/20 rounded"></div>
                 </div>
               </div>
